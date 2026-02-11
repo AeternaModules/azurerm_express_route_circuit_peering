@@ -35,19 +35,19 @@ EOT
     peering_type                  = string
     resource_group_name           = string
     vlan_id                       = number
-    ipv4_enabled                  = optional(bool, true)
+    ipv4_enabled                  = optional(bool) # Default: true
     peer_asn                      = optional(number)
     primary_peer_address_prefix   = optional(string)
     route_filter_id               = optional(string)
     secondary_peer_address_prefix = optional(string)
     shared_key                    = optional(string)
     ipv6 = optional(object({
-      enabled = optional(bool, true)
+      enabled = optional(bool) # Default: true
       microsoft_peering = optional(object({
         advertised_communities     = optional(list(string))
         advertised_public_prefixes = optional(list(string))
-        customer_asn               = optional(number, 0)
-        routing_registry_name      = optional(string, "NONE")
+        customer_asn               = optional(number) # Default: 0
+        routing_registry_name      = optional(string) # Default: "NONE"
       }))
       primary_peer_address_prefix   = string
       route_filter_id               = optional(string)
@@ -56,8 +56,8 @@ EOT
     microsoft_peering_config = optional(object({
       advertised_communities     = optional(list(string))
       advertised_public_prefixes = list(string)
-      customer_asn               = optional(number, 0)
-      routing_registry_name      = optional(string, "NONE")
+      customer_asn               = optional(number) # Default: 0
+      routing_registry_name      = optional(string) # Default: "NONE"
     }))
   }))
 }
