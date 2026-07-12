@@ -1,3 +1,7 @@
+output "express_route_circuit_peerings_id" {
+  description = "Map of id values across all express_route_circuit_peerings, keyed the same as var.express_route_circuit_peerings"
+  value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => v.id }
+}
 output "express_route_circuit_peerings_azure_asn" {
   description = "Map of azure_asn values across all express_route_circuit_peerings, keyed the same as var.express_route_circuit_peerings"
   value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => v.azure_asn }
