@@ -1,3 +1,8 @@
+data "azurerm_key_vault_secret" "shared_key" {
+  for_each     = { for k, v in var.express_route_circuit_peerings : k => v if v.shared_key_key_vault_id != null && v.shared_key_key_vault_secret_name != null }
+  name         = each.value.shared_key_key_vault_secret_name
+  key_vault_id = each.value.shared_key_key_vault_id
+}
 resource "azurerm_express_route_circuit_peering" "express_route_circuit_peerings" {
   for_each = var.express_route_circuit_peerings
 
@@ -10,7 +15,7 @@ resource "azurerm_express_route_circuit_peering" "express_route_circuit_peerings
   primary_peer_address_prefix   = each.value.primary_peer_address_prefix
   route_filter_id               = each.value.route_filter_id
   secondary_peer_address_prefix = each.value.secondary_peer_address_prefix
-  shared_key                    = each.value.shared_key
+  shared_key                    = each.value.shared_key != null ? each.value.shared_key : try(data.azurerm_key_vault_secret.shared_key[each.key].value, null)
 
   dynamic "ipv6" {
     for_each = each.value.ipv6 != null ? [each.value.ipv6] : []

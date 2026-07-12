@@ -13,6 +13,8 @@ Optional:
     - route_filter_id
     - secondary_peer_address_prefix
     - shared_key
+    - shared_key_key_vault_id (alternative to shared_key - read from Key Vault instead)
+    - shared_key_key_vault_secret_name (alternative to shared_key - read from Key Vault instead)
     - ipv6 (block):
         - enabled (optional)
         - microsoft_peering (optional, block):
@@ -31,16 +33,18 @@ Optional:
 EOT
 
   type = map(object({
-    express_route_circuit_name    = string
-    peering_type                  = string
-    resource_group_name           = string
-    vlan_id                       = number
-    ipv4_enabled                  = optional(bool) # Default: true
-    peer_asn                      = optional(number)
-    primary_peer_address_prefix   = optional(string)
-    route_filter_id               = optional(string)
-    secondary_peer_address_prefix = optional(string)
-    shared_key                    = optional(string)
+    express_route_circuit_name       = string
+    peering_type                     = string
+    resource_group_name              = string
+    vlan_id                          = number
+    ipv4_enabled                     = optional(bool) # Default: true
+    peer_asn                         = optional(number)
+    primary_peer_address_prefix      = optional(string)
+    route_filter_id                  = optional(string)
+    secondary_peer_address_prefix    = optional(string)
+    shared_key                       = optional(string)
+    shared_key_key_vault_id          = optional(string)
+    shared_key_key_vault_secret_name = optional(string)
     ipv6 = optional(object({
       enabled = optional(bool) # Default: true
       microsoft_peering = optional(object({
