@@ -64,44 +64,54 @@ EOT
       routing_registry_name      = optional(string)
     }))
   }))
-  # --- Unconfirmed validation candidates, derived from azurerm_express_route_circuit_peering's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: peering_type
-  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
-  # path: resource_group_name
-  #   condition: length(value) <= 90
-  #   message:   [from resourcegroups.ValidateName: invalid when len(value) > 90]
-  #   source:    [from resourcegroups.ValidateName: invalid when len(value) > 90]
-  # path: resource_group_name
-  #   condition: !endswith(value, ".")
-  #   message:   [from resourcegroups.ValidateName: must not end with "."]
-  #   source:    [from resourcegroups.ValidateName: must not end with "."]
-  # path: resource_group_name
-  #   condition: length(value) != 0
-  #   message:   [from resourcegroups.ValidateName: invalid when len(value) == 0]
-  #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
-  # path: resource_group_name
-  #   source:    [from resourcegroups.ValidateName] !matched
-  # path: shared_key
-  #   condition: length(value) >= 1 && length(value) <= 25
-  #   message:   must be between 1 and 25 characters
-  # path: microsoft_peering_config.advertised_communities[*]
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: ipv6.microsoft_peering.advertised_public_prefixes[*]
-  #   source:    validation.IsCIDR(...) - no translation rule yet, add one
-  # path: ipv6.microsoft_peering.routing_registry_name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: ipv6.route_filter_id
-  #   source:    [from routefilters.ValidateRouteFilterID] !ok
-  # path: ipv6.route_filter_id
-  #   source:    [from routefilters.ValidateRouteFilterID] err != nil
-  # path: route_filter_id
-  #   source:    [from routefilters.ValidateRouteFilterID] !ok
-  # path: route_filter_id
-  #   source:    [from routefilters.ValidateRouteFilterID] err != nil
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        length(v.resource_group_name) <= 90
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: invalid when len(value) > 90]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        !endswith(v.resource_group_name, ".")
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: must not end with \".\"]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        length(v.resource_group_name) != 0
+      )
+    ])
+    error_message = "[from resourcegroups.ValidateName: invalid when len(value) == 0]"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        v.shared_key == null || (length(v.shared_key) >= 1 && length(v.shared_key) <= 25)
+      )
+    ])
+    error_message = "must be between 1 and 25 characters"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        v.microsoft_peering_config == null || (v.microsoft_peering_config.advertised_communities == null || (alltrue([for x in v.microsoft_peering_config.advertised_communities : length(x) > 0])))
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.express_route_circuit_peerings : (
+        v.ipv6 == null || (v.ipv6.microsoft_peering == null || (v.ipv6.microsoft_peering.routing_registry_name == null || (length(v.ipv6.microsoft_peering.routing_registry_name) > 0)))
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # Note: 7 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 
