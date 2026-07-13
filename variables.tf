@@ -37,7 +37,7 @@ EOT
     peering_type                     = string
     resource_group_name              = string
     vlan_id                          = number
-    ipv4_enabled                     = optional(bool) # Default: true
+    ipv4_enabled                     = optional(bool)
     peer_asn                         = optional(number)
     primary_peer_address_prefix      = optional(string)
     route_filter_id                  = optional(string)
@@ -46,12 +46,12 @@ EOT
     shared_key_key_vault_id          = optional(string)
     shared_key_key_vault_secret_name = optional(string)
     ipv6 = optional(object({
-      enabled = optional(bool) # Default: true
+      enabled = optional(bool)
       microsoft_peering = optional(object({
         advertised_communities     = optional(list(string))
         advertised_public_prefixes = optional(list(string))
-        customer_asn               = optional(number) # Default: 0
-        routing_registry_name      = optional(string) # Default: "NONE"
+        customer_asn               = optional(number)
+        routing_registry_name      = optional(string)
       }))
       primary_peer_address_prefix   = string
       route_filter_id               = optional(string)
@@ -60,34 +60,10 @@ EOT
     microsoft_peering_config = optional(object({
       advertised_communities     = optional(list(string))
       advertised_public_prefixes = list(string)
-      customer_asn               = optional(number) # Default: 0
-      routing_registry_name      = optional(string) # Default: "NONE"
+      customer_asn               = optional(number)
+      routing_registry_name      = optional(string)
     }))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.express_route_circuit_peerings : (
-        v.shared_key == null || (length(v.shared_key) >= 1 && length(v.shared_key) <= 25)
-      )
-    ])
-    error_message = "must be between 1 and 25 characters"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.express_route_circuit_peerings : (
-        v.microsoft_peering_config == null || (v.microsoft_peering_config.advertised_communities == null || (length(v.microsoft_peering_config.advertised_communities) > 0))
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.express_route_circuit_peerings : (
-        v.ipv6 == null || (v.ipv6.microsoft_peering == null || (v.ipv6.microsoft_peering.routing_registry_name == null || (length(v.ipv6.microsoft_peering.routing_registry_name) > 0)))
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_express_route_circuit_peering's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -108,8 +84,17 @@ EOT
   #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
   # path: resource_group_name
   #   source:    [from resourcegroups.ValidateName] !matched
+  # path: shared_key
+  #   condition: length(value) >= 1 && length(value) <= 25
+  #   message:   must be between 1 and 25 characters
+  # path: microsoft_peering_config.advertised_communities[*]
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: ipv6.microsoft_peering.advertised_public_prefixes[*]
   #   source:    validation.IsCIDR(...) - no translation rule yet, add one
+  # path: ipv6.microsoft_peering.routing_registry_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: ipv6.route_filter_id
   #   source:    [from routefilters.ValidateRouteFilterID] !ok
   # path: ipv6.route_filter_id
