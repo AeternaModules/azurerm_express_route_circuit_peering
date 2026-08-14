@@ -20,11 +20,11 @@ output "express_route_circuit_peerings_ipv4_enabled" {
 }
 output "express_route_circuit_peerings_ipv6" {
   description = "Map of ipv6 values across all express_route_circuit_peerings, keyed the same as var.express_route_circuit_peerings"
-  value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => v.ipv6 if v.ipv6 != null && length(v.ipv6) > 0 }
+  value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => one(v.ipv6) if v.ipv6 != null && length(v.ipv6) > 0 }
 }
 output "express_route_circuit_peerings_microsoft_peering_config" {
   description = "Map of microsoft_peering_config values across all express_route_circuit_peerings, keyed the same as var.express_route_circuit_peerings"
-  value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => v.microsoft_peering_config if v.microsoft_peering_config != null && length(v.microsoft_peering_config) > 0 }
+  value       = { for k, v in azurerm_express_route_circuit_peering.express_route_circuit_peerings : k => one(v.microsoft_peering_config) if v.microsoft_peering_config != null && length(v.microsoft_peering_config) > 0 }
 }
 output "express_route_circuit_peerings_peer_asn" {
   description = "Map of peer_asn values across all express_route_circuit_peerings, keyed the same as var.express_route_circuit_peerings"
